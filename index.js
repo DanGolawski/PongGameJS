@@ -12,6 +12,21 @@ window.onload = () => {
     let paddleX = (canvas.width - paddleWidth) / 2;
     let rightPressed = false;
     let leftPressed = false;
+    let brickRowCount = 3;
+    let brickColumnCount = 5
+    let brickWidth = 75;
+    let brickHeight = 20;
+    let brickPadding = 10;
+    let brickOffsetTop = 30;
+    let brickOffsetLeft = 30;
+
+    let bricks = []
+    for (let column = 0; column < brickColumnCount; column++) {
+        bricks[column] = [];
+        for (let row = 0; row < brickRowCount; row++) {
+            bricks[column][row] = { x: 0, y: 0 };
+        }
+    }
 
     document.addEventListener("keydown", keyDownHandler, false);
     document.addEventListener("keyup", keyUpHandler, false);
@@ -49,10 +64,35 @@ window.onload = () => {
         ctx.closePath();
     }
 
+    function drawBricks() {
+        for (let column = 0; column < brickColumnCount; column++) {
+            for (let row = 0; row < brickRowCount; row++) {
+                let brickX = (column * (brickWidth + brickPadding)) + brickOffsetLeft;
+                let brickY = (row * (brickHeight + brickPadding)) + brickOffsetTop;
+                bricks[column][row].x = brickX;
+                bricks[column][row].y = brickY;
+                ctx.beginPath();
+                ctx.rect(brickX, brickY, brickWidth, brickHeight);
+                ctx.fillStyle = '#0095DD';
+                ctx.fill();
+                ctx.closePath();
+            }
+        }
+    }
+
+    function collisionDetection() {
+        for (let column = 0; column < brickColumnCount; column++) {
+            for (let row = 0; row < brickRowCount; row++) {
+                let b = brick[column][row];
+            }
+        }
+    }
+
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawBall();
         drawPaddle();
+        drawBricks();
 
         if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
             dx = -dx;
@@ -90,3 +130,5 @@ window.onload = () => {
 
     let interval = setInterval(draw, 10);
 }
+
+// https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript/Collision_detection
