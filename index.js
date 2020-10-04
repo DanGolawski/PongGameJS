@@ -1,6 +1,5 @@
 window.onload = () => {
-    let canvas = document.querySelector('#myCanvas');
-    console.log(canvas)
+    let canvas = document.getElementById("myCanvas");
     let ctx = canvas.getContext("2d");
     let ballRadius = 10;
     let x = canvas.width / 2;
@@ -13,18 +12,18 @@ window.onload = () => {
     let rightPressed = false;
     let leftPressed = false;
     let brickRowCount = 3;
-    let brickColumnCount = 5
+    let brickColumnCount = 5;
     let brickWidth = 75;
     let brickHeight = 20;
     let brickPadding = 10;
     let brickOffsetTop = 30;
     let brickOffsetLeft = 30;
 
-    let bricks = []
+    let bricks = [];
     for (let column = 0; column < brickColumnCount; column++) {
         bricks[column] = [];
         for (let row = 0; row < brickRowCount; row++) {
-            bricks[column][row] = { x: 0, y: 0 };
+            bricks[column][row] = { x: 0, y: 0, status: 1 };
         }
     }
 
@@ -48,7 +47,19 @@ window.onload = () => {
             leftPressed = false;
         }
     }
-
+    function collisionDetection() {
+        for (var column = 0; column < brickColumnCount; column++) {
+            for (var row = 0; row < brickRowCount; row++) {
+                var b = bricks[column][row];
+                if (b.status == 1) {
+                    if (x > b.x && x < b.x + brickWidth && y > b.y && y < b.y + brickHeight) {
+                        dy = -dy;
+                        b.status = 0;
+                    }
+                }
+            }
+        }
+    }
     function drawBall() {
         ctx.beginPath();
         ctx.arc(x, y, ballRadius, 0, Math.PI * 2);
@@ -63,36 +74,30 @@ window.onload = () => {
         ctx.fill();
         ctx.closePath();
     }
-
     function drawBricks() {
-        for (let column = 0; column < brickColumnCount; column++) {
-            for (let row = 0; row < brickRowCount; row++) {
-                let brickX = (column * (brickWidth + brickPadding)) + brickOffsetLeft;
-                let brickY = (row * (brickHeight + brickPadding)) + brickOffsetTop;
-                bricks[column][row].x = brickX;
-                bricks[column][row].y = brickY;
-                ctx.beginPath();
-                ctx.rect(brickX, brickY, brickWidth, brickHeight);
-                ctx.fillStyle = '#0095DD';
-                ctx.fill();
-                ctx.closePath();
-            }
-        }
-    }
-
-    function collisionDetection() {
-        for (let column = 0; column < brickColumnCount; column++) {
-            for (let row = 0; row < brickRowCount; row++) {
-                let b = brick[column][row];
+        for (var column = 0; column < brickColumnCount; column++) {
+            for (var row = 0; row < brickRowCount; row++) {
+                if (bricks[column][row].status == 1) {
+                    var brickX = (column * (brickWidth + brickPadding)) + brickOffsetLeft;
+                    var brickY = (row * (brickHeight + brickPadding)) + brickOffsetTop;
+                    bricks[column][row].x = brickX;
+                    bricks[column][row].y = brickY;
+                    ctx.beginPath();
+                    ctx.rect(brickX, brickY, brickWidth, brickHeight);
+                    ctx.fillStyle = "#0095DD";
+                    ctx.fill();
+                    ctx.closePath();
+                }
             }
         }
     }
 
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawBricks();
         drawBall();
         drawPaddle();
-        drawBricks();
+        collisionDetection();
 
         if (x + dx > canvas.width - ballRadius || x + dx < ballRadius) {
             dx = -dx;
@@ -102,33 +107,27 @@ window.onload = () => {
         }
         else if (y + dy > canvas.height - ballRadius) {
             if (x > paddleX && x < paddleX + paddleWidth) {
-                dy = -dy;
+                if (y = y - paddleHeight) {
+                    dy = -dy;
+                }
             }
             else {
-                alert('GAME OVER');
+                alert("GAME OVER");
                 document.location.reload();
-                clearInterval(interval) // Needed for Chrome to end the game
+                clearInterval(interval); // Needed for Chrome to end game
             }
         }
 
-        if (rightPressed) {
-            paddleX += 5;
-            if (paddleX + paddleWidth > canvas.width) {
-                paddleX = canvas.width - paddleWidth;
-            }
+        if (rightPressed && paddleX < canvas.width - paddleWidth) {
+            paddleX += 7;
         }
-        else if (leftPressed) {
-            paddleX -= 5;
-            if (paddleX < 0) {
-                paddleX = 0;
-            }
+        else if (leftPressed && paddleX > 0) {
+            paddleX -= 7;
         }
 
         x += dx;
         y += dy;
     }
 
-    let interval = setInterval(draw, 10);
+    var interval = setInterval(draw, 10);
 }
-
-// https://developer.mozilla.org/en-US/docs/Games/Tutorials/2D_Breakout_game_pure_JavaScript/Collision_detection
